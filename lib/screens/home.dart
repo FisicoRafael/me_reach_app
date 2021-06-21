@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:me_reach_app/helper/requisicao_servidor.dart';
 import 'package:me_reach_app/helper/salvar_servidor.dart';
 import 'package:me_reach_app/model/servidores.dart';
@@ -76,8 +77,30 @@ class _ListaDeServidoresState extends State<ListaDeServidores> {
                             ? Text("OFFLINE")
                             : Text("ONLINE"),
                         onTap: () {
-                          BancoURLServidores.internal()
-                              .deleteURLServidor(listaDeServidores[index].id);
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Deseja excluir esse servidor?"),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          BancoURLServidores.internal()
+                                              .deleteURLServidor(
+                                                  listaDeServidores[index].id);
+                                          chamarToaster(
+                                              "Servidor DELETADO. Role a lista para baixo para atualizar.");
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text("Sim")),
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text("Não"))
+                                  ],
+                                );
+                              });
                         },
                       );
                     })),
@@ -136,6 +159,8 @@ void _showColocarURL(
                           _ListaDeServidoresState()._chamarAtualizacao();
                           Navigator.pop(context);
                           controller.clear();
+                          chamarToaster(
+                              "Servidor ADICIONADO. Role a lista para baixo para atualizar.");
                         }
                       },
                       child: Text("ADICIONAR")),
@@ -146,4 +171,15 @@ void _showColocarURL(
               );
             });
       });
+}
+
+Future<bool?> chamarToaster(String mensagem) {
+  return Fluttertoast.showToast(
+      msg: mensagem,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0);
 }
